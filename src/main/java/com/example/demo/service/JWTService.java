@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 import com.example.demo.entity.Role;
 import com.example.demo.entity.User;
 
+import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
@@ -35,6 +36,15 @@ public class JWTService {
 				.claim("role", role.getName().name()).claim("permission", permissions).setIssuedAt(new Date())
 				.setExpiration(new Date(System.currentTimeMillis() + expiration))
 				.signWith(secretKey, SignatureAlgorithm.HS256).compact();
+	}
+
+	public Claims validateTokenAndGetClaims(String token) {
+		try {
+			return Jwts.parserBuilder().setSigningKey(secretKey).build().parseClaimsJws(token).getBody();
+		} catch (Exception e) {
+			System.out.println("Invalid or expired JWT: " + e.getMessage());
+			return null;
+		}
 	}
 
 }
