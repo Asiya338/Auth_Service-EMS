@@ -40,7 +40,7 @@ public class AuthServiceImpl implements AuthService {
 		User user = userRepository.findByEmail(request.getEmail())
 				.orElseThrow(() -> new RuntimeException("Invalid email or password"));
 
-		if (!passwordEncoder.matches(user.getPassword(), request.getPassword())) {
+		if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
 			log.error("Password mismatch. Try with correct password ");
 
 			throw new RuntimeException("Password mismatch ");

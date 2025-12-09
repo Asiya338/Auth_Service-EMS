@@ -41,7 +41,7 @@ public class DataSeeder implements CommandLineRunner {
 		seedRoles();
 		seedPermissions();
 		seedRolePermissions();
-		seedAdminUser();
+//		seedAdminUser();
 	}
 
 	private void seedRoles() {
@@ -109,7 +109,8 @@ public class DataSeeder implements CommandLineRunner {
 		String email = Constant.EMAIL;
 
 		if (userRepository.existsByEmail(email)) {
-			throw new RuntimeException("Email already exists");
+			return;
+//			throw new RuntimeException("Email already exists");
 		}
 
 		User user = new User();
