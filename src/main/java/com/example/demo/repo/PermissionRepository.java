@@ -10,5 +10,4 @@ import com.example.demo.enums.PermissionEnum;
 public interface PermissionRepository extends JpaRepository<Permission, Long> {
 
 	Optional<Permission> findByName(PermissionEnum pEnum);
-
 }

@@ -10,4 +10,6 @@ import com.example.demo.enums.RoleEnum;
 public interface RoleRepository extends JpaRepository<Role, Long> {
 
 	Optional<Role> findByName(RoleEnum name);
+
+	Optional<Role> findByUserId(Long id);
 }
