@@ -45,7 +45,7 @@ public class JWTService {
 
 	public Claims validateTokenAndGetClaims(String token) {
 		try {
-			log.info("Validating and returning jwt claims to authenticate based role and permissions");
+			log.info("Validating and returning jwt claims to authenticate based on role and permissions");
 
 			return Jwts.parserBuilder().setSigningKey(secretKey).build().parseClaimsJws(token).getBody();
 		}

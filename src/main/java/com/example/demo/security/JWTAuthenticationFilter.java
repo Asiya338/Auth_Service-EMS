@@ -2,8 +2,10 @@ package com.example.demo.security;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
@@ -57,9 +59,13 @@ public class JWTAuthenticationFilter extends OncePerRequestFilter {
 
 		String email = claims.getSubject();
 
-		List<String> permissions = claims.get("role", List.class);
+		String role = claims.get("role", String.class);
 
-		List<SimpleGrantedAuthority> authorities = permissions.stream().map(SimpleGrantedAuthority::new).toList();
+		List<String> permissions = claims.get("permission", List.class);
+
+		List<GrantedAuthority> authorities = permissions.stream().map(SimpleGrantedAuthority::new)
+				.collect(Collectors.toList());
+		authorities.add(new SimpleGrantedAuthority("ROLE_" + role));
 
 		log.info("Create Authentication Object to save in security context");
 

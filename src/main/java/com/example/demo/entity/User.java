@@ -2,8 +2,12 @@ package com.example.demo.entity;
 
 import java.time.LocalDateTime;
 
+import com.example.demo.enums.PasswordStatusEnum;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -30,7 +34,11 @@ public class User {
 	@Column(nullable = false)
 	private String password; // Store BCrypt hashed password
 
-	private boolean active = true;
+	private Boolean active = true;
+
+	@Enumerated(EnumType.STRING)
+	@Column(nullable = false)
+	private PasswordStatusEnum passwordStatus = PasswordStatusEnum.PASSWORD_NOT_SET;
 
 	@Column(name = "created_at", updatable = false)
 	private LocalDateTime createdAt;

@@ -2,6 +2,7 @@ package com.example.demo.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -13,9 +14,10 @@ import com.example.demo.security.JWTAuthenticationFilter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
-@Configuration
 @Slf4j
+@Configuration
 @RequiredArgsConstructor
+@EnableMethodSecurity(prePostEnabled = true)
 public class SecureConfig {
 
 	private final JWTAuthenticationFilter jwtAuthenticationFilter;
@@ -29,12 +31,13 @@ public class SecureConfig {
 	public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 
 		http.csrf(csrf -> csrf.disable())
-				.authorizeHttpRequests(auth -> auth.requestMatchers("/api/v1/auth/login").permitAll() // allow
-						// login
-						.anyRequest().authenticated())// protect all others
+				.authorizeHttpRequests(auth -> auth.requestMatchers("/api/v1/auth/login").permitAll()
+						.requestMatchers("/api/v1/auth/refresh-token").permitAll()
+						.requestMatchers("/api/v1/auth/register").permitAll().requestMatchers("/api/v1/auth/admin/**")
+						.hasRole("ADMIN") // FIXED
+						.anyRequest().authenticated())
 				.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
-				.formLogin(login -> login.disable()) // disable Spring Security login page
-				.httpBasic(basic -> basic.disable()); // disable basic auth
+				.formLogin(login -> login.disable()).httpBasic(basic -> basic.disable());
 
 		return http.build();
 	}

@@ -10,6 +10,9 @@ import org.springframework.web.bind.annotation.RestController;
 import com.example.demo.dto.LoginRequestDTO;
 import com.example.demo.dto.LoginResponseDTO;
 import com.example.demo.dto.RefreshTokenRequestDTO;
+import com.example.demo.dto.RegisterRequestDTO;
+import com.example.demo.dto.RegisterResponseDTO;
+import com.example.demo.dto.SetPasswordRequestDTO;
 import com.example.demo.service.AuthService;
 
 import jakarta.validation.Valid;
@@ -46,8 +49,32 @@ public class AuthController {
 		return ResponseEntity.ok(response);
 	}
 
-	@GetMapping("/test")
-	public ResponseEntity<String> test() {
+	@PostMapping("/register")
+	public ResponseEntity<RegisterResponseDTO> registerUser(@Valid @RequestBody RegisterRequestDTO request) {
+		log.info("Registering user ");
+
+		RegisterResponseDTO response = authService.registerUser(request);
+
+		log.info("User registered with email and password");
+
+		return ResponseEntity.ok(response);
+	}
+
+	@PostMapping("/set-password")
+	public ResponseEntity<String> setUserPassword(@Valid @RequestBody SetPasswordRequestDTO request) {
+
+		log.info("Set user password ");
+
+		authService.setUserPassword(request);
+
+		log.info("User password is set successfully");
+
+		return ResponseEntity.ok("Password is set successfully. You can log in");
+	}
+
+//	@PreAuthorize("hasAuthority('ROLE_ADMIN')")
+	@GetMapping("/admin")
+	public ResponseEntity<String> adminOnly() {
 		log.info("Auth Test");
 
 		return ResponseEntity.ok("Auth Service is working");
