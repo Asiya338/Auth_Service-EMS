@@ -1,9 +1,9 @@
 package com.example.demo.service;
 
+import java.nio.charset.StandardCharsets;
+import java.security.Key;
 import java.util.Date;
 import java.util.List;
-
-import javax.crypto.SecretKey;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -21,50 +21,56 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class JWTService {
 
-	private SecretKey secretKey;
+	@Value("${jwt.secret}")
+	private String secret;
 
 	@Value("${jwt.expiration}")
 	private long expiration;
 
-	@Value("${jwt.secret}")
-	private String secret;
-
 	@Value("${jwt.refreshExpiration}")
 	private long refreshExpiration;
 
-	public String generateJwtToken(User user, Role role, List<String> permissions) {
-		secretKey = Keys.hmacShaKeyFor(secret.getBytes());
-
-		log.info("Generating JWT token based on email, role and permissions...");
-
-		return Jwts.builder().setSubject(user.getEmail()).claim("userId", user.getId())
-				.claim("role", role.getName().name()).claim("permission", permissions).setIssuedAt(new Date())
-				.setExpiration(new Date(System.currentTimeMillis() + expiration))
-				.signWith(secretKey, SignatureAlgorithm.HS256).compact();
+	private Key getSigningKey() {
+		return Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
 	}
 
+	// ===================== Generate Access Token =====================
+
+	public String generateJwtToken(User user, Role role, List<String> permissions) {
+
+		log.info("Generating JWT access token...");
+
+		return Jwts.builder().setSubject(user.getEmail()).claim("userId", user.getId())
+				.claim("role", role.getName().name()).claim("permission", permissions) // FIXED
+				.setIssuedAt(new Date()).setExpiration(new Date(System.currentTimeMillis() + expiration))
+				.signWith(getSigningKey(), SignatureAlgorithm.HS256) // FIXED
+				.compact();
+	}
+
+	// ===================== Validate Token =====================
+
 	public Claims validateTokenAndGetClaims(String token) {
+
 		try {
-			log.info("Validating and returning jwt claims to authenticate based on role and permissions");
+			log.info("Validating JWT token...");
 
-			return Jwts.parserBuilder().setSigningKey(secretKey).build().parseClaimsJws(token).getBody();
-		}
-
-		catch (Exception e) {
-
-			log.error("Invalid or expired JWT: {} " + e.getMessage());
-
+			return Jwts.parserBuilder().setSigningKey(getSigningKey()) // ALWAYS use getSigningKey()
+					.build().parseClaimsJws(token).getBody();
+		} catch (Exception e) {
+			log.error("Invalid or expired JWT: {}", e.getMessage());
 			return null;
 		}
 	}
 
+	// ===================== Refresh Token =====================
+
 	public String generateRefreshToken(User user) {
-		log.info("Generating refreh token for user : {} ", user.getUsername());
+
+		log.info("Generating refresh token for user: {}", user.getUsername());
 
 		return Jwts.builder().setSubject(user.getEmail()).setIssuedAt(new Date())
-				.setExpiration(new Date(System.currentTimeMillis() + refreshExpiration)) // 7 days
-				.signWith(secretKey, SignatureAlgorithm.HS256).compact();
-
+				.setExpiration(new Date(System.currentTimeMillis() + refreshExpiration))
+				.signWith(getSigningKey(), SignatureAlgorithm.HS256) // FIXED
+				.compact();
 	}
-
 }
