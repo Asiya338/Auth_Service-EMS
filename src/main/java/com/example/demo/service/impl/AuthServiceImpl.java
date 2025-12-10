@@ -18,6 +18,7 @@ import com.example.demo.repo.UserRoleRepository;
 import com.example.demo.service.AuthService;
 import com.example.demo.service.JWTService;
 
+import io.jsonwebtoken.Claims;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -55,7 +56,37 @@ public class AuthServiceImpl implements AuthService {
 
 		String jwtToken = jwtService.generateJwtToken(user, role, permissions);
 
+//		String refreshToken = jwtService.generateRefreshToken(user);
+
 		return new LoginResponseDTO(jwtToken, "Bearer", user.getEmail(), role.getName().name(), null, null,
+				permissions);
+	}
+
+	@Override
+	public LoginResponseDTO refreshToken(String refreshToken) {
+		log.info("Get claims by validating refresh token ");
+
+		Claims claims = jwtService.validateTokenAndGetClaims(refreshToken);
+
+		if (claims == null) {
+			throw new RuntimeException("Invalid or expired access token");
+		}
+
+		String email = claims.getSubject();
+
+		User user = userRepository.findByEmail(email).orElseThrow(() -> new RuntimeException("User doesn't exists"));
+
+		UserRole userRole = userRoleRepository.findByUserId(user.getId())
+				.orElseThrow(() -> new RuntimeException("User`s Role doesn't exists"));
+
+		Role role = userRole.getRole();
+
+		List<String> permissions = rolePermissionRepository.findPermissionsByRoleId(role.getId());
+
+		String accessToken = jwtService.generateJwtToken(user, role, permissions);
+		String refreshToken2 = jwtService.generateRefreshToken(user);
+
+		return new LoginResponseDTO(accessToken, "Bearer", email, role.getName().name(), refreshToken2, null,
 				permissions);
 	}
 

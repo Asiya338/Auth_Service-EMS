@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.example.demo.dto.LoginRequestDTO;
 import com.example.demo.dto.LoginResponseDTO;
+import com.example.demo.dto.RefreshTokenRequestDTO;
 import com.example.demo.service.AuthService;
 
 import jakarta.validation.Valid;
@@ -30,6 +31,17 @@ public class AuthController {
 		LoginResponseDTO response = authService.login(request);
 
 		log.info("Login successfully");
+
+		return ResponseEntity.ok(response);
+	}
+
+	@PostMapping("/refresh-token")
+	public ResponseEntity<LoginResponseDTO> refreshToken(@Valid @RequestBody RefreshTokenRequestDTO request) {
+		log.info("Generate Refresh token");
+
+		LoginResponseDTO response = authService.refreshToken(request.getRefreshToken());
+
+		log.info("Generate Refresh token successfully");
 
 		return ResponseEntity.ok(response);
 	}

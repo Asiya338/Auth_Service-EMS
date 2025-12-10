@@ -1,9 +1,10 @@
 package com.example.demo.security;
 
 import java.io.IOException;
-import java.util.Collections;
+import java.util.List;
 
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
@@ -28,28 +29,42 @@ public class JWTAuthenticationFilter extends OncePerRequestFilter {
 	@Override
 	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
 			throws ServletException, IOException {
-		// TODO : extract jwt token and validate
+
+		log.info("JWT validation per every request");
 
 		String authHeader = request.getHeader("Authorization");
+		log.info("Header must have Bearer Authorization with JWT token");
 
 		if (authHeader == null || !authHeader.contains("Bearer ")) {
+			log.info("User is not logged in with Bearer Authorization");
+
 			filterChain.doFilter(request, response);
 			return;
 		}
 
 		String token = authHeader.substring(7);
+		log.info("Extract JWT token from every request to validate");
 
 		Claims claims = jwtService.validateTokenAndGetClaims(token);
+		log.info("Claims store the user email, role and permissions ...");
 
 		if (claims == null) {
+			log.info("Claims is null");
+
 			filterChain.doFilter(request, response);
 			return;
 		}
 
 		String email = claims.getSubject();
 
+		List<String> permissions = claims.get("role", List.class);
+
+		List<SimpleGrantedAuthority> authorities = permissions.stream().map(SimpleGrantedAuthority::new).toList();
+
+		log.info("Create Authentication Object to save in security context");
+
 		UsernamePasswordAuthenticationToken authTokenObj = new UsernamePasswordAuthenticationToken(email, null,
-				Collections.emptyList());
+				authorities);
 
 		SecurityContextHolder.getContext().setAuthentication(authTokenObj);
 

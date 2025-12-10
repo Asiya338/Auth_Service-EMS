@@ -29,8 +29,13 @@ public class JWTService {
 	@Value("${jwt.secret}")
 	private String secret;
 
+	@Value("${jwt.refreshExpiration}")
+	private long refreshExpiration;
+
 	public String generateJwtToken(User user, Role role, List<String> permissions) {
 		secretKey = Keys.hmacShaKeyFor(secret.getBytes());
+
+		log.info("Generating JWT token based on email, role and permissions...");
 
 		return Jwts.builder().setSubject(user.getEmail()).claim("userId", user.getId())
 				.claim("role", role.getName().name()).claim("permission", permissions).setIssuedAt(new Date())
@@ -40,11 +45,26 @@ public class JWTService {
 
 	public Claims validateTokenAndGetClaims(String token) {
 		try {
+			log.info("Validating and returning jwt claims to authenticate based role and permissions");
+
 			return Jwts.parserBuilder().setSigningKey(secretKey).build().parseClaimsJws(token).getBody();
-		} catch (Exception e) {
-			System.out.println("Invalid or expired JWT: " + e.getMessage());
+		}
+
+		catch (Exception e) {
+
+			log.error("Invalid or expired JWT: {} " + e.getMessage());
+
 			return null;
 		}
+	}
+
+	public String generateRefreshToken(User user) {
+		log.info("Generating refreh token for user : {} ", user.getUsername());
+
+		return Jwts.builder().setSubject(user.getEmail()).setIssuedAt(new Date())
+				.setExpiration(new Date(System.currentTimeMillis() + refreshExpiration)) // 7 days
+				.signWith(secretKey, SignatureAlgorithm.HS256).compact();
+
 	}
 
 }
