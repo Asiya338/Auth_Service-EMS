@@ -34,8 +34,6 @@ public class JWTService {
 		return Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
 	}
 
-	// ===================== Generate Access Token =====================
-
 	public String generateJwtToken(User user, Role role, List<String> permissions) {
 
 		log.info("Generating JWT access token...");
@@ -46,8 +44,6 @@ public class JWTService {
 				.signWith(getSigningKey(), SignatureAlgorithm.HS256) // FIXED
 				.compact();
 	}
-
-	// ===================== Validate Token =====================
 
 	public Claims validateTokenAndGetClaims(String token) {
 
@@ -61,8 +57,6 @@ public class JWTService {
 			return null;
 		}
 	}
-
-	// ===================== Refresh Token =====================
 
 	public String generateRefreshToken(User user) {
 

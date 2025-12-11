@@ -1,12 +1,16 @@
 package com.example.demo.controller;
 
+import java.security.Principal;
+
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.example.demo.dto.ChangePasswordRequestDTO;
 import com.example.demo.dto.LoginRequestDTO;
 import com.example.demo.dto.LoginResponseDTO;
 import com.example.demo.dto.RefreshTokenRequestDTO;
@@ -70,6 +74,19 @@ public class AuthController {
 		log.info("User password is set successfully");
 
 		return ResponseEntity.ok("Password is set successfully. You can log in");
+	}
+
+	@PreAuthorize("isAuthenticated()")
+	@PostMapping("/change-password")
+	public ResponseEntity<String> changeUserPassword(@Valid @RequestBody ChangePasswordRequestDTO request,
+			Principal principal) {
+		log.info("Change authenticated user password ");
+
+		authService.changeUserPassword(request, principal.getName());
+
+		log.info("User password is changed successfully");
+
+		return ResponseEntity.ok("Password changed successfully. You can log in with new Password");
 	}
 
 //	@PreAuthorize("hasAuthority('ROLE_ADMIN')")

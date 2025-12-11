@@ -7,6 +7,7 @@ import java.util.UUID;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import com.example.demo.dto.ChangePasswordRequestDTO;
 import com.example.demo.dto.LoginRequestDTO;
 import com.example.demo.dto.LoginResponseDTO;
 import com.example.demo.dto.RegisterRequestDTO;
@@ -170,6 +171,26 @@ public class AuthServiceImpl implements AuthService {
 		passwordResetTokenRepository.delete(passwordResetToken);
 
 		log.info("Password set successfully for user : {} ", user.getEmail());
+	}
+
+	@Override
+	public void changeUserPassword(@Valid ChangePasswordRequestDTO request, String email) {
+		log.info("Change password for : {} ", email);
+
+		User user = userRepository.findByEmail(email).orElseThrow(() -> new RuntimeException("User doesn't exists"));
+
+		if (!passwordEncoder.matches(request.getOldPassword(), user.getPassword())) {
+			log.error("Old password mismatch. Please enter correct password to change");
+
+			throw new RuntimeException("Old password mismatch");
+		}
+
+		user.setPassword(passwordEncoder.encode(request.getNewPassword()));
+		user.setUpdatedAt(LocalDateTime.now());
+
+		userRepository.save(user);
+
+		log.info("User password changed successfully");
 	}
 
 }
