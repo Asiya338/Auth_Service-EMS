@@ -13,6 +13,7 @@ import com.example.demo.dto.LoginResponseDTO;
 import com.example.demo.dto.RegisterRequestDTO;
 import com.example.demo.dto.RegisterResponseDTO;
 import com.example.demo.dto.SetPasswordRequestDTO;
+import com.example.demo.dto.UserInfoResponseDTO;
 import com.example.demo.entity.PasswordResetToken;
 import com.example.demo.entity.Permission;
 import com.example.demo.entity.Role;
@@ -191,6 +192,23 @@ public class AuthServiceImpl implements AuthService {
 		userRepository.save(user);
 
 		log.info("User password changed successfully");
+	}
+
+	@Override
+	public UserInfoResponseDTO getLoggedInUser(String email) {
+		log.info("Getting logged in user details of user : {} ", email);
+
+		User user = userRepository.findByEmail(email).orElseThrow(() -> new RuntimeException("User doesn't exists"));
+
+		UserRole userRole = userRoleRepository.findByUserId(user.getId())
+				.orElseThrow(() -> new RuntimeException("Role doesn't exist for this user "));
+
+		Role role = userRole.getRole();
+
+		List<String> permissions = rolePermissionRepository.findPermissionsByRoleId(role.getId());
+
+		return new UserInfoResponseDTO(user.getId(), user.getUsername(), email, user.getActive(), role.getName().name(),
+				permissions);
 	}
 
 }

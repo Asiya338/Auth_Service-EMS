@@ -17,6 +17,7 @@ import com.example.demo.dto.RefreshTokenRequestDTO;
 import com.example.demo.dto.RegisterRequestDTO;
 import com.example.demo.dto.RegisterResponseDTO;
 import com.example.demo.dto.SetPasswordRequestDTO;
+import com.example.demo.dto.UserInfoResponseDTO;
 import com.example.demo.service.AuthService;
 
 import jakarta.validation.Valid;
@@ -89,12 +90,16 @@ public class AuthController {
 		return ResponseEntity.ok("Password changed successfully. You can log in with new Password");
 	}
 
-//	@PreAuthorize("hasAuthority('ROLE_ADMIN')")
-	@GetMapping("/admin")
-	public ResponseEntity<String> adminOnly() {
-		log.info("Auth Test");
+	@PreAuthorize("isAuthenticated()")
+	@GetMapping("/me")
+	public ResponseEntity<UserInfoResponseDTO> getMyDetails(Principal principal) {
+		log.info("Get logged in user details");
 
-		return ResponseEntity.ok("Auth Service is working");
+		UserInfoResponseDTO response = authService.getLoggedInUser(principal.getName());
+
+		log.info("Fetched User details successfully");
+
+		return ResponseEntity.ok(response);
 	}
 
 }
