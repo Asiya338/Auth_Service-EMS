@@ -7,13 +7,14 @@ import java.util.UUID;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import com.example.demo.dto.ChangePasswordRequestDTO;
-import com.example.demo.dto.LoginRequestDTO;
-import com.example.demo.dto.LoginResponseDTO;
-import com.example.demo.dto.RegisterRequestDTO;
-import com.example.demo.dto.RegisterResponseDTO;
-import com.example.demo.dto.SetPasswordRequestDTO;
-import com.example.demo.dto.UserInfoResponseDTO;
+import com.example.demo.dto.req.ChangePasswordRequestDTO;
+import com.example.demo.dto.req.LoginRequestDTO;
+import com.example.demo.dto.req.RegisterRequestDTO;
+import com.example.demo.dto.req.SetPasswordRequestDTO;
+import com.example.demo.dto.res.LoginResponseDTO;
+import com.example.demo.dto.res.RegisterResponseDTO;
+import com.example.demo.dto.res.UserInfoResponseDTO;
+import com.example.demo.dto.res.ValidateTokenResponseDTO;
 import com.example.demo.entity.PasswordResetToken;
 import com.example.demo.entity.Permission;
 import com.example.demo.entity.Role;
@@ -209,6 +210,27 @@ public class AuthServiceImpl implements AuthService {
 
 		return new UserInfoResponseDTO(user.getId(), user.getUsername(), email, user.getActive(), role.getName().name(),
 				permissions);
+	}
+
+	@Override
+	public ValidateTokenResponseDTO validateToken(String token) {
+
+		log.info("Validating Token ");
+
+		Claims claims = jwtService.validateTokenAndGetClaims(token);
+
+		if (claims == null) {
+			log.error("Invalid Token. No user found");
+
+			return new ValidateTokenResponseDTO(false, null, null, null, null);
+		}
+
+		String email = claims.getSubject();
+		Long userId = claims.get("userId", Long.class);
+		String role = claims.get("role", String.class);
+		List<String> permissions = claims.get("permission", List.class);
+
+		return new ValidateTokenResponseDTO(true, userId, email, role, permissions);
 	}
 
 }

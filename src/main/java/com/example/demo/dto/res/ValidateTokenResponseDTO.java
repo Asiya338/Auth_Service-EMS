@@ -1,4 +1,6 @@
-package com.example.demo.dto;
+package com.example.demo.dto.res;
+
+import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 
@@ -8,12 +10,12 @@ import lombok.Data;
 @Data
 @AllArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class RegisterResponseDTO {
+public class ValidateTokenResponseDTO {
 
+	private Boolean valid;
+	private Long userId;
 	private String email;
 
 	private String role;
-
-	private String setPasswordUrl;;
-
+	private List<String> permissions;
 }

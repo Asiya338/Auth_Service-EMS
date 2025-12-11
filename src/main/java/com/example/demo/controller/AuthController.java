@@ -10,14 +10,16 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.example.demo.dto.ChangePasswordRequestDTO;
-import com.example.demo.dto.LoginRequestDTO;
-import com.example.demo.dto.LoginResponseDTO;
-import com.example.demo.dto.RefreshTokenRequestDTO;
-import com.example.demo.dto.RegisterRequestDTO;
-import com.example.demo.dto.RegisterResponseDTO;
-import com.example.demo.dto.SetPasswordRequestDTO;
-import com.example.demo.dto.UserInfoResponseDTO;
+import com.example.demo.dto.req.ChangePasswordRequestDTO;
+import com.example.demo.dto.req.LoginRequestDTO;
+import com.example.demo.dto.req.RefreshTokenRequestDTO;
+import com.example.demo.dto.req.RegisterRequestDTO;
+import com.example.demo.dto.req.SetPasswordRequestDTO;
+import com.example.demo.dto.req.ValidateTokenRequestDTO;
+import com.example.demo.dto.res.LoginResponseDTO;
+import com.example.demo.dto.res.RegisterResponseDTO;
+import com.example.demo.dto.res.UserInfoResponseDTO;
+import com.example.demo.dto.res.ValidateTokenResponseDTO;
 import com.example.demo.service.AuthService;
 
 import jakarta.validation.Valid;
@@ -98,6 +100,17 @@ public class AuthController {
 		UserInfoResponseDTO response = authService.getLoggedInUser(principal.getName());
 
 		log.info("Fetched User details successfully");
+
+		return ResponseEntity.ok(response);
+	}
+
+	@PostMapping("/validate-token")
+	public ResponseEntity<ValidateTokenResponseDTO> validateToken(@Valid @RequestBody ValidateTokenRequestDTO request) {
+		log.info("Validate Token for external microservices");
+
+		ValidateTokenResponseDTO response = authService.validateToken(request.getToken());
+
+		log.info("Token Validated successfully");
 
 		return ResponseEntity.ok(response);
 	}
