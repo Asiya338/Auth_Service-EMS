@@ -23,7 +23,7 @@ public interface GetAuthService {
 
 	UserInfoResponseDTO getAllUserByUserId(long userId);
 
-	void updateRoleToUser(@Valid RoleRequestDTO request);
+	void updateRoleToUser(@Valid RoleRequestDTO request, Long userId);
 
 	void deactivateUser(Long id);
 

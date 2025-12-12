@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.example.demo.dto.req.RoleRequestDTO;
 import com.example.demo.dto.res.UserInfoResponseDTO;
@@ -62,7 +63,7 @@ public class GetAuthServiceImpl implements GetAuthService {
 	}
 
 	@Override
-//	@Transactional
+	@Transactional
 	public void assignRoleToUser(RoleRequestDTO request) {
 		log.info("Assign Role : {}  to user with id : {} ", request.getRole(), request.getUserId());
 
@@ -92,7 +93,7 @@ public class GetAuthServiceImpl implements GetAuthService {
 		List<UserInfoResponseDTO> response = users.stream().map(user -> {
 			UserInfoResponseDTO dto = new UserInfoResponseDTO();
 			UserRole userRole = userRoleRepository.findByUserId(user.getId())
-					.orElseThrow(() -> new RuntimeException("Role doesn't exist for this user "));
+					.orElseThrow(() -> new RuntimeException("Role doesn't exist for this user : " + user.getEmail()));
 
 			Role role = userRole.getRole();
 
@@ -134,11 +135,11 @@ public class GetAuthServiceImpl implements GetAuthService {
 	}
 
 	@Override
-	public void updateRoleToUser(@Valid RoleRequestDTO request) {
-		log.info("Update Role : {}  to user with id : {} ", request.getRole(), request.getUserId());
+	@Transactional
+	public void updateRoleToUser(@Valid RoleRequestDTO request, Long userId) {
+		log.info("Update Role : {}  to user with id : {} ", request.getRole(), userId);
 
-		User user = userRepository.findById(request.getUserId())
-				.orElseThrow(() -> new RuntimeException("User doesn't exists"));
+		User user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("User doesn't exists"));
 
 		userRoleRepository.deleteByUserId(user.getId());
 

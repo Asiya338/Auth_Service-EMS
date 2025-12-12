@@ -93,11 +93,11 @@ public class GetAuthController {
 	@PostMapping("/users/{userId}/role")
 	public ResponseEntity<String> updateUserRole(@PathVariable long userId,
 			@Valid @RequestBody RoleRequestDTO request) {
-		log.info("Updtae role to user : {} ", request.getUserId());
+		log.info("Updtae role to user : {} ", userId);
 
-		authService.updateRoleToUser(request);
+		authService.updateRoleToUser(request, userId);
 
-		log.info("Role updated to user successfully : {} , {} ", request.getRole(), request.getUserId());
+		log.info("Role updated to user successfully : {} , {} ", request.getRole(), userId);
 
 		return ResponseEntity.ok("Role updated to user successfully");
 	}
