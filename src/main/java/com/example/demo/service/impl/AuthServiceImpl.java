@@ -207,9 +207,15 @@ public class AuthServiceImpl implements AuthService {
 		Role role = userRole.getRole();
 
 		List<String> permissions = rolePermissionRepository.findPermissionsByRoleId(role.getId());
+		UserInfoResponseDTO dto = new UserInfoResponseDTO();
+		dto.setId(user.getId());
+		dto.setUsername(user.getUsername());
+		dto.setEmail(user.getEmail());
+		dto.setActive(user.getActive());
+		dto.setPermissions(permissions);
+		dto.setRole(role.getName().name());
 
-		return new UserInfoResponseDTO(user.getId(), user.getUsername(), email, user.getActive(), role.getName().name(),
-				permissions);
+		return dto;
 	}
 
 	@Override
